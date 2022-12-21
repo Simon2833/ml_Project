@@ -1,17 +1,13 @@
 import numpy as np
-import matplotlib as mpl
+from scipy.stats import rankdata
 import matplotlib.pyplot as plt
-from bagging import MyBaggingclassifier
-from sklearn.model_selection import RepeatedStratifiedKFold
-from sklearn.naive_bayes import GaussianNB
-from sklearn.tree import DecisionTreeClassifier
-from sklearn.neighbors import KNeighborsClassifier
-from sklearn.svm import SVC
-from sklearn.linear_model import SGDClassifier
-from sklearn.base import clone
-from sklearn.metrics import accuracy_score
-import warnings
-warnings.filterwarnings('ignore')
+from orangelib import compute_CD, graph_ranks
+import matplotlib as mpl
+from tabulate import tabulate
+
+# In this part after we made our model and used it we're averaging our model by datasets and folds to decrease the variance.
+# Also I needed to delete last column, because it wasn't filled and had only 0's.
+# Figure is going to be 15x3 with plots 20x3.
 
 
 # Function that fills out values in plot, used mainly for rounding and visibility.
@@ -52,7 +48,7 @@ x1 = 0
 x2 = 0
 
 boots = ["majority vote", "support matrices", "weighted majority vote"]
-clsf = ["SGD", "GNB", "KNN", "SVM", "DT"]
+clfs = ["SGD", "GNB", "KNN", "SVM", "DT"]
 
 comb = ["samples", "features", "both"]
 n_clf = [5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100]
@@ -78,7 +74,7 @@ for ax in a:
         ax.set_xlabel("n_clf", va="center", labelpad=15)
 
     if (x2 == 0):
-        ax.set_ylabel(clsf[nrr], rotation=90, va="bottom", fontweight='bold')
+        ax.set_ylabel(clfs[nrr], rotation=90, va="bottom", fontweight='bold')
         nrr += 1
     elif (x2 == 2):
         ax.yaxis.set_label_position("right")
@@ -100,4 +96,34 @@ fig.suptitle('Accuracy rate on (Bootstrap_technique*Classifiers) using value of 
 
 plt.savefig("heatmap.png")
 
-# Still working on statistical tests, probably add them in near future.
+
+datasets = ['australian', 'balance', 'breastcan', 'cryotherapy', 'diabetes', 'ecoli4', 'glass2', 'heart', 'ionosphere',
+            'liver', 'monkthree', 'soybean', 'vowel0', 'wisconsin']
+
+scores = np.load("results.npy")
+scores = np.mean(scores, axis=1)
+scores = np.delete(scores, 20, 4)
+scores = np.max(scores, axis=4)
+scores = np.max(scores, axis=3)
+scores = np.max(scores, axis=2)
+
+# Visual editions for test to look good and be accurate
+headers = list(clfs)
+names_column = np.expand_dims(np.array(list(datasets)), axis=1)
+dat_statistic_table = np.concatenate((names_column, scores), axis=1)
+dat_statistic_table = tabulate(dat_statistic_table, headers, floatfmt=".3f")
+print(dat_statistic_table)
+
+ranks = []
+
+for datas in scores:
+    ranks.append(rankdata(datas).tolist())
+ranks = np.array(ranks)
+
+mean_ranks = np.mean(ranks, axis=0)
+print("----------------------------------------------\n", "Mean ranks: ", np.round(mean_ranks, 3))
+
+cd = compute_CD(mean_ranks, 14)
+
+graph_ranks(mean_ranks, clfs, cd=cd, wdth=6, textspace=1.5)
+plt.savefig("cd.png")
