@@ -4,4 +4,11 @@ Statistical test are in progress, but will be done in near future.
 
 # Heatmap of example results
 
-![](heatmap.png)
+![](pngs/heatmap.png)
+
+# Table and plot of evaluation
+
+<p align="center">
+  <img src="pngs/ev_results.png">
+  <img src="pngs/cd.png">
+</p>
