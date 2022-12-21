@@ -1,6 +1,6 @@
 # ml_Project
 Simple project with my own version of bagging and model to execute it. I already did some testing and have result files with AccuracyRate.
-Statistical test are in progress, but will be done in near future.
+All plots were done in matplotlib, to make cd graph I used orange data mining library.
 
 # Heatmap of example results
 
